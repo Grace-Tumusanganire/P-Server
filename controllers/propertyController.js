@@ -1,35 +1,53 @@
-const propertymodels = require('../models/propertymodels');
-const Joi = require('joi');
-const express = require('express');
-var bodyParser = require('body-parser')
+import Property from '../models/propertymodels';
+import moment from 'moment';
+import cloudinary from 'cloudinary';
 
-const app = express();
 
-app.use(bodyParser.json())
 
 const propertiesControllers = {
 
-   async newProperty (res,req) {
+   async newProperty (req,res) {
 
-        const { price, state, city, address, type } = req.body;
+        const { price, state, city, address, type, property_status } = req.body;
 
-        if (!req.files.image) {
-            return res.status(400).send ({message:'image required'});
-        }
+        const owner = req.user.email;
+
+        const created_on = moment().format();
+
         const propertyImage = req.files.image.path;
-        const newProperty = {
-            price,
-            state,
-            city,
-            address,
-            type,
-            owner: req.user.id,
-            status: 'available',
-            created_on: moment().format(),
-            image_url: result.url
-        };
-            
-        }
+
+        cloudinary.v2.uploader.upload(propertyImage,  (error, result)=> { 
+            console.log(result, error) 
+         }
+         );
+        
+            try{
+                const property = new Property(state, price, city, address, property_status, 
+                    type, owner, created_on, image_url= result);
+                property.createProperty()
+                const status = 201;
+                return res.status(status).json({
+                    status, property, message: res.message || 'Property advert created successfully'
+                });
+            } catch (err) {
+                const status = 400;
+                return res.status(status).json({
+                    status,
+                    message: err.message || 'Missing parameters'
+                });
+            }
+
+    },
+
+
+}
+
+  export default propertiesControllers;
+
+
+    
+                 
+
     
     
 
@@ -60,4 +78,4 @@ const propertiesControllers = {
 
 
 
-    }
+    

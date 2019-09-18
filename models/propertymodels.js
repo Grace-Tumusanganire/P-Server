@@ -38,7 +38,7 @@ findAllProperties() {
 
 
 }
-export default propertymodels;
+export default Property;
 
 
 
